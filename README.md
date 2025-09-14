@@ -1,7 +1,9 @@
 # Coffee-System  
 
 . First you need to go to folder frontend and run: npm i  
+
 . Second go to folder backend and run: npm i  
+
 => After that go to file .env in folder backend and configure:  
 DB_CONNECTION=sqlsrv      <-- use sql serve to avoid error database  
 DB_HOST=127.0.0.1         <-- your default host  
