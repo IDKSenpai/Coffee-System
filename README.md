@@ -30,4 +30,4 @@ After that open Chrome and run: http://localhost:5173/
 If you want to use printer in Chrome 
 - Open Chrome and run:  
 ==> chrome://flags/#enable-experimental-web-platform-features  
-and enable it  
+- And enable it  
