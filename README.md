@@ -23,6 +23,8 @@ use Illuminate\Support\Facades\Hash;
 
 Final:  
 - You need to go to folder frontend run: npm run dev  
-- Go to folder backend run php artisan serve  
+- Go to folder backend and run: php artisan serve  
 
-After that open chrome and run: http://localhost:5173/  
+After that open Chrome and run: http://localhost:5173/  
+
+If you want to use printer in Chrome: chrome://flags/#enable-experimental-web-platform-features and enable it  
