@@ -10,10 +10,10 @@ export default function Invoice({ data, onBack }: InvoiceProps) {
   const printViaBluetooth = async () => {
     try {
       const device = await navigator.bluetooth.requestDevice({
-        filters: [
-          {
-            services: ["00002af1-0000-1000-8000-00805f9b34fb"],
-          },
+        acceptAllDevices: true,
+        optionalServices: [
+          "000018f0-0000-1000-8000-00805f9b34fb", // printer service
+          "00002af1-0000-1000-8000-00805f9b34fb", // printer characteristic
         ],
       });
 
@@ -26,45 +26,81 @@ export default function Invoice({ data, onBack }: InvoiceProps) {
       );
 
       const encoder = new ESCPOS();
+
+      // Build receipt
       encoder
         .initialize()
         .align("center")
         .bold(true)
         .text("Coffee System")
-        .bold(false)
+        .text("")
         .align("left")
+        .bold(false)
         .text("")
         .text(`Invoice No: ${data.invoice_no}`)
+        .text("")
         .text(`Date: ${new Date(data.created_at).toLocaleString()}`)
-        .text("--------------------------------");
+        .text("")
+        .text(`Payment Method: ${data.payment_method}`)
+        .text("")
+        .text(`Paid By: Customer`)
+        .text("--------------------------------")
+        .text("Items:");
 
       data.items.forEach((item: any) => {
-        const subtotal =
-          item.price * item.quantity * (1 - (item.discount ?? 0) / 100);
-        encoder.text(`${item.item?.name} x ${item.quantity}`);
-        encoder.text(`  Subtotal: $${subtotal.toFixed(2)}`);
+        const itemPrice = parseFloat(item.price);
+        const itemQuantity = parseFloat(item.quantity);
+        const itemDiscount = parseFloat(item.discount ?? 0);
+        const itemSubtotal = itemPrice * itemQuantity;
+        const finalSubtotal =
+          itemPrice * itemQuantity * (1 - itemDiscount / 100);
+
+        encoder
+          .text("")
+          .text(`.${item.item?.name} = $${itemPrice.toFixed(2)}`)
+          .text("")
+          .text(
+            `$${itemPrice.toFixed(
+              2
+            )} x ${itemQuantity} = $${itemSubtotal.toFixed(2)}`
+          )
+          .text("")
+          .text(`Discount: ${itemDiscount}%`)
+          .text("")
+          .text(`Subtotal: $${finalSubtotal.toFixed(2)}`)
+          .text("");
       });
 
       encoder
         .text("--------------------------------")
-        .text("")
         .bold(true)
-        .align("right")
-        .text(`Total: $${data.total_pay}`)
+        .text(`Total:$${parseFloat(data.total_pay).toFixed(2)}`)
+        .bold(false)
+        .align("center")
+        .text("")
+        .text("")
+        .text("Thank you! Come again!")
+        .text("")
+        .text("")
         .cut("partial");
 
-      const printBuffer = encoder.getBuffer();
+      const printBuffer = encoder.encode();
 
-      await characteristic.writeValue(printBuffer);
+      const chunkSize = 512;
+      for (let i = 0; i < printBuffer.length; i += chunkSize) {
+        const chunk = printBuffer.slice(i, i + chunkSize);
+        await characteristic.writeValue(chunk);
+        await new Promise((res) => setTimeout(res, 50));
+      }
     } catch (error) {
       console.error("Printing failed:", error);
-      alert("Printing failed: " + error.message);
+      alert("Printing failed: " + (error as Error).message);
     }
   };
 
   return (
     <div>
-      <ScrollArea className="h-160">
+      <ScrollArea className="h-140">
         <h1 className="text-2xl font-bold mb-4 text-center">Coffee System</h1>
         <p>Invoice No: {data.invoice_no}</p>
         <p>Date: {new Date(data.created_at).toLocaleString()}</p>
@@ -74,27 +110,33 @@ export default function Invoice({ data, onBack }: InvoiceProps) {
         <h2 className="mt-4 font-semibold">Items</h2>
         <ul className="list-disc pl-5">
           {data.items.map((it: any, i: number) => {
-            const realSubtotal = it.price * it.quantity;
-            const subtotal =
-              it.price * it.quantity * (1 - (it.discount ?? 0) / 100);
+            const itemPrice = parseFloat(it.price);
+            const itemQuantity = parseFloat(it.quantity);
+            const itemDiscount = parseFloat(it.discount ?? 0);
+
+            const itemSubtotal = itemPrice * itemQuantity;
+            const finalSubtotal =
+              itemPrice * itemQuantity * (1 - itemDiscount / 100);
 
             return (
               <li key={i} className="mb-2">
-                {it.item?.name} = ${it.price}
-                <br />${it.price} x {it.quantity} = ${realSubtotal.toFixed(2)}{" "}
-                <br />
-                {it.discount ? ` (Discount: ${it.discount}%)` : ""}
+                {it.item?.name} = ${itemPrice.toFixed(2)}
+                <br />${itemPrice.toFixed(2)} x {itemQuantity} = $
+                {itemSubtotal.toFixed(2)}
+                {it.discount ? ` (Discount: ${itemDiscount}%)` : ""}
                 <div>
                   <span className="font-bold">Subtotal: </span>$
-                  {subtotal.toFixed(2)}
+                  {finalSubtotal.toFixed(2)}
                 </div>
               </li>
             );
           })}
         </ul>
-
-        <p className="pt-2 font-bold">Total: ${data.total_pay}</p>
+        <p className="pt-2 font-bold">
+          Total: ${parseFloat(data.total_pay).toFixed(2)}
+        </p>
       </ScrollArea>
+
       <button
         className="mt-4 border px-4 py-2 rounded bg-green-500 text-white cursor-pointer"
         onClick={printViaBluetooth}
@@ -105,8 +147,7 @@ export default function Invoice({ data, onBack }: InvoiceProps) {
         className="mt-4 border px-4 py-2 rounded bg-blue-500 text-white cursor-pointer"
         onClick={onBack}
       >
-        {" "}
-        Back to Checkout{" "}
+        Back to Checkout
       </button>
     </div>
   );
