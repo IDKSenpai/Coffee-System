@@ -23,7 +23,7 @@ Requirement:
 ==> Create Account go to backend folder and run: npm run dev    
 
 - php artisan migrate:fresh --seed  
-  --You done Create Account!!--  
+  -- You done Create Account!! --  
 
 Final:  
 
