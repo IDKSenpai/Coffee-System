@@ -3,7 +3,7 @@
 Requirement:   
 - Node Js
 - PHP
-- Sql Server
+- Sql Server  
 
 1. Go to folder frontend and run: npm i  
 
