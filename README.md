@@ -5,12 +5,12 @@
 . Second go to folder backend and run: npm i  
 
 => After that go to file .env in folder backend and configure:  
-DB_CONNECTION=sqlsrv &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<-- use sql serve to avoid error database  
-DB_HOST=127.0.0.1 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<-- your default host  
-DB_PORT=1433 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<-- your database port (sql server defualt port 1433)  
-DB_DATABASE=Coffee_Syste &nbsp;<-- your database name  
-DB_USERNAME=sa &nbsp;&nbsp;&nbsp;&nbsp;<-- your dataabse username  
-DB_PASSWORD= &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<-- your password databse if don't have leave it empty  
+DB_CONNECTION=sqlsrv <-- use sql serve to avoid error database  
+DB_HOST=127.0.0.1 <-- your default host  
+DB_PORT=1433 <-- your database port (sql server defualt port 1433)  
+DB_DATABASE=Coffee_Syste <-- your database name  
+DB_USERNAME=sa <-- your dataabse username  
+DB_PASSWORD= <-- your password databse if don't have leave it empty  
 
 . Third step go to folder backend run: php artisan storage:link  
 . Fourth go to folder backend and run: php artisan migrate  
