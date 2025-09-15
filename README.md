@@ -1,5 +1,10 @@
 # Coffee-System
 
+!!Requirement:  
+- Node Js
+- PHP
+- Sql Server
+
 . First you need to go to folder frontend and run: npm i  
 
 . Second go to folder backend and run: npm i  
