@@ -1,5 +1,3 @@
-<<<<<<< HEAD
-
 # Coffee-System
 
 Requirement:
@@ -71,5 +69,3 @@ Final:
 - Open root folder and run: npm run dev
 
 After that open Chrome and run: http://localhost:5173/
-
-> > > > > > > d3cbe4eed9b3f95b8959ddb346a8724dfa3d2de7
