@@ -3,11 +3,12 @@
 Requirement:   
 - Node Js
 - PHP
+- Composer
 - Sql Server  
 
 1. Go to folder frontend and run: npm i  
 
-2. Go to folder backend and run: npm i  
+2. Go to folder backend and run: composer install  
 
 => After that go to file .env in folder backend and configure:  
 - DB_CONNECTION=sqlsrv &nbsp;&nbsp; <-- use sql serve to avoid error database  
