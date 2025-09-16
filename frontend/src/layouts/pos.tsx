@@ -258,7 +258,7 @@ function Pos() {
         ) : items.length === 0 ? (
           <p className="mt-4">No items found</p>
         ) : (
-          <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4">
+          <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
             {items.map((item) => (
               <Card
                 key={item.id}

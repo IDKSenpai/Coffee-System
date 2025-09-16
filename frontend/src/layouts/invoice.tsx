@@ -47,7 +47,6 @@ export default function Invoice({ data, onBack }: InvoiceProps) {
       for (let i = 0; i < commands.length; i += chunkSize) {
         const chunk = commands.slice(i, i + chunkSize);
         await characteristic.writeValue(chunk);
-        await new Promise((res) => setTimeout(res, 50));
       }
     } catch (error) {
       console.error("Bluetooth printing failed:", error);
