@@ -80,6 +80,9 @@ function Pos() {
     name: string;
   } | null>(null);
 
+  // Calculate the total number of items for the badge
+  const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+
   useEffect(() => {
     const fetchUser = async () => {
       try {
@@ -139,7 +142,10 @@ function Pos() {
         quantity: item.quantity,
         price: item.price,
         discount: item.discount || 0,
-        options: item.selectedOptions,
+        options: Object.entries(item.selectedOptions).map(([name, value]) => ({
+          name,
+          values: [value],
+        })),
       })),
     };
 
@@ -191,7 +197,7 @@ function Pos() {
         { ...item, quantity: 1, selectedOptions: defaultOptions, discount: 0 },
       ]);
     }
-    setIsOpen(true);
+    // Removed setIsOpen(true) to prevent auto-opening on mobile
   };
 
   const removeFromCart = (id: number) => {
@@ -242,7 +248,7 @@ function Pos() {
 
   return (
     <main className="flex gap-4">
-      <aside className="flex-1">
+      <aside className="grid">
         <div className="border-b pb-4">
           <Search onSearch={handleSearch} />
         </div>
@@ -252,9 +258,23 @@ function Pos() {
         ) : items.length === 0 ? (
           <p className="mt-4">No items found</p>
         ) : (
-          <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-3 gap-4">
+          <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4">
             {items.map((item) => (
-              <Card key={item.id} className="w-full">
+              <Card
+                key={item.id}
+                className="w-60"
+                onClick={(e) => {
+                  // Prevent clicks on interactive children like buttons/selects from triggering this
+                  const target = e.target as HTMLElement;
+                  if (
+                    target.tagName !== "BUTTON" &&
+                    target.tagName !== "SELECT" &&
+                    target.tagName !== "OPTION"
+                  ) {
+                    addToCart(item);
+                  }
+                }}
+              >
                 <CardHeader>
                   <CardTitle className="border h-40 rounded-xl overflow-hidden">
                     {item.image ? (
@@ -303,12 +323,18 @@ function Pos() {
         )}
       </aside>
 
-      <aside className="w-1/3">
+      <aside className="lg:w-1/3">
         <button
           onClick={() => setIsOpen(true)}
-          className="block md:hidden bg-black text-white p-3 rounded-full fixed bottom-10 right-6 cursor-pointer shadow-lg"
+          className="block md:hidden bg-black text-white p-3 rounded-full bottom-10 right-6 cursor-pointer shadow-lg fixed"
         >
           <ShoppingCart />
+          {/* Badge for total items */}
+          {totalItems > 0 && (
+            <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs text-white">
+              {totalItems}
+            </span>
+          )}
         </button>
 
         <div
@@ -319,7 +345,7 @@ function Pos() {
           <div className="flex justify-between items-center border-b-2 pb-2 mb-4">
             <h1 className="font-bold text-xl">Add to Cart</h1>
             <CircleX
-              className="text-red-600 cursor-pointer"
+              className="text-red-600 cursor-pointer xl:hidden 2xl:hidden md:hidden lg:hidden"
               onClick={() => setIsOpen(false)}
             />
           </div>
@@ -523,13 +549,7 @@ function Pos() {
 
       {showInvoiceModal && invoiceData && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-xl w-96 relative">
-            <button
-              className="absolute top-2 right-2 text-red-500 text-xl"
-              onClick={() => setShowInvoiceModal(false)}
-            >
-              &times;
-            </button>
+          <div className="bg-white py-6 rounded-xl relative">
             <Invoice
               data={invoiceData}
               onBack={() => setShowInvoiceModal(false)}

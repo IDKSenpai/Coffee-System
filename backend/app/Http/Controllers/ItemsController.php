@@ -14,7 +14,7 @@ class ItemsController extends Controller
         $items = Items::query()
             ->when($q, function ($query, $q) {
                 $query->where('name', 'LIKE', "%{$q}%")
-                      ->orWhere('price', 'LIKE', "%{$q}%");
+                    ->orWhere('price', 'LIKE', "%{$q}%");
             })
             ->get();
 
@@ -48,7 +48,7 @@ class ItemsController extends Controller
             'name'  => 'required|string|max:255',
             'price' => 'required|numeric|min:0',
             'image' => 'nullable|image|max:20480',
-            'options' => 'nullable|json', 
+            'options' => 'nullable|json',
         ]);
 
         $item = Items::findOrFail($id);
@@ -64,11 +64,11 @@ class ItemsController extends Controller
             $item->image = $request->file('image')->store('items', 'public');
         }
 
-            $item->save();
-            return response()->json($item);
+        $item->save();
+        return response()->json($item);
     }
 
-    
+
     public function destroy($id)
     {
         $item = Items::findOrFail($id);
