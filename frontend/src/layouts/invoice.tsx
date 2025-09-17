@@ -1,5 +1,3 @@
-// invoice.tsx
-
 import { ScrollArea } from "@/components/ui/scroll-area";
 import React from "react";
 import { toPng } from "html-to-image";
@@ -105,7 +103,7 @@ export default function Invoice({ data, onBack }: InvoiceProps) {
       const blob = await new Promise<Blob>((resolve) =>
         canvas.toBlob((b) => resolve(b!), "image/png")
       );
-      let bitmap = await createImageBitmap(blob);
+      const bitmap = await createImageBitmap(blob);
 
       // 4. Resize to printer width
       const printerHeightPx =

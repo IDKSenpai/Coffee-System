@@ -31,32 +31,39 @@ interface CartItem extends Item {
   selectedOptions: { [key: string]: string };
 }
 
+// Debounce utility function to prevent excessive API calls
+const debounce = (func, delay) => {
+  let timeoutId;
+  return (...args) => {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => {
+      func.apply(null, args);
+    }, delay);
+  };
+};
+
 interface SearchProps {
   onSearch: (query: string) => void;
 }
 
 export function Search({ onSearch }: SearchProps) {
   const [query, setQuery] = useState("");
-  const handleSearch = (e?: React.FormEvent) => {
-    e?.preventDefault();
-    onSearch(query);
+
+  const handleInputChange = (e) => {
+    const newQuery = e.target.value;
+    setQuery(newQuery);
+    onSearch(newQuery);
   };
 
   return (
-    <form
-      onSubmit={handleSearch}
-      className="flex w-full max-w-sm items-center gap-2"
-    >
+    <div className="flex w-full max-w-sm items-center gap-2">
       <Input
         type="text"
         placeholder="Search items..."
         value={query}
-        onChange={(e) => setQuery(e.target.value)}
+        onChange={handleInputChange}
       />
-      <Button type="submit" variant="outline">
-        Search
-      </Button>
-    </form>
+    </div>
   );
 }
 
@@ -80,7 +87,9 @@ function Pos() {
     name: string;
   } | null>(null);
 
-  // Calculate the total number of items for the badge
+  // State to hold the search query for the API call
+  const [searchQuery, setSearchQuery] = useState("");
+
   const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
 
   useEffect(() => {
@@ -92,13 +101,31 @@ function Pos() {
         console.error("Failed to fetch user:", err);
       }
     };
-
     fetchUser();
   }, []);
 
-  const handleSearch = (query: string) => {
-    fetchItems(query);
-  };
+  // Debounced search handler
+  const debouncedSearch = debounce((query) => {
+    setSearchQuery(query);
+  }, 500); // 500ms delay
+
+  // useEffect to fetch items whenever searchQuery changes
+  useEffect(() => {
+    const fetchItems = async () => {
+      try {
+        setLoading(true);
+        const res = await api.get("/items", {
+          params: searchQuery ? { q: searchQuery } : {},
+        });
+        setItems(res.data);
+      } catch (err) {
+        console.error("❌ Failed to fetch items:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchItems();
+  }, [searchQuery]);
 
   useEffect(() => {
     const usd = cart.reduce(
@@ -161,24 +188,6 @@ function Pos() {
     }
   };
 
-  useEffect(() => {
-    fetchItems();
-  }, []);
-
-  const fetchItems = async (query = "") => {
-    try {
-      setLoading(true);
-      const res = await api.get("/items", {
-        params: query ? { search: query } : {},
-      });
-      setItems(res.data);
-    } catch (err) {
-      console.error("❌ Failed to fetch items:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const addToCart = (item: Item) => {
     const existing = cart.find((c) => c.id === item.id);
     if (existing) {
@@ -197,7 +206,6 @@ function Pos() {
         { ...item, quantity: 1, selectedOptions: defaultOptions, discount: 0 },
       ]);
     }
-    // Removed setIsOpen(true) to prevent auto-opening on mobile
   };
 
   const removeFromCart = (id: number) => {
@@ -250,7 +258,7 @@ function Pos() {
     <main className="flex gap-4">
       <aside className="grid">
         <div className="border-b pb-4">
-          <Search onSearch={handleSearch} />
+          <Search onSearch={debouncedSearch} />
         </div>
 
         {loading ? (
@@ -264,7 +272,6 @@ function Pos() {
                 key={item.id}
                 className="w-60"
                 onClick={(e) => {
-                  // Prevent clicks on interactive children like buttons/selects from triggering this
                   const target = e.target as HTMLElement;
                   if (
                     target.tagName !== "BUTTON" &&
@@ -329,7 +336,6 @@ function Pos() {
           className="block md:hidden bg-black text-white p-3 rounded-full bottom-10 right-6 cursor-pointer shadow-lg fixed"
         >
           <ShoppingCart />
-          {/* Badge for total items */}
           {totalItems > 0 && (
             <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs text-white">
               {totalItems}

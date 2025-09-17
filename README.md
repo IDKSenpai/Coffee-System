@@ -27,6 +27,8 @@ Requirement:
 
 - php artisan migrate:fresh --seed  
   -- You done Create Account!! --
+- Username: admin
+- Password: 123
 
 Final:
 
